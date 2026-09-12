@@ -1,0 +1,15 @@
+.env
+.venv/
+venv/
+Qwen_*
+_check_web.py
+_last_summary.txt
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+*.log
