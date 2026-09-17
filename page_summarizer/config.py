@@ -125,13 +125,13 @@ def get_settings() -> Settings:
         chutes_base_url=_first_env("CHUTES_BASE_URL", "DOC_ANALYZER_CHUTES_BASE_URL")
         or "https://llm.chutes.ai/v1",
         chutes_model=_first_env("CHUTES_MODEL", "DOC_ANALYZER_CHUTES_MODEL")
-        or "Qwen/Qwen3.8-27B-TEE",
+        or "zai-org/GLM-5.1-TEE",
         request_timeout=_env_float("PAGE_SUMMARIZER_HTTP_TIMEOUT", 20.0),
         llm_timeout=_env_float("PAGE_SUMMARIZER_LLM_TIMEOUT", 90.0),
         max_retries=_env_int("PAGE_SUMMARIZER_MAX_RETRIES", 3),
         max_input_chars=_env_int("PAGE_SUMMARIZER_MAX_INPUT_CHARS", 12_000),
         user_agent=os.getenv(
             "PAGE_SUMMARIZER_USER_AGENT",
-            "Mozilla/5.0 (compatible; PageSummarizer/1.0; educational project)",
+            "Mozilla/5.0 (compatible; JudicialActAnalyzer/1.0; educational project)",
         ).strip(),
     )
