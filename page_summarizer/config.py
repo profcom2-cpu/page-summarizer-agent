@@ -120,12 +120,12 @@ def get_settings() -> Settings:
         qwen_base_url=_first_env("QWEN_BASE_URL", "DOC_ANALYZER_QWEN_BASE_URL")
         or "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
         qwen_model=_first_env("QWEN_MODEL", "DOC_ANALYZER_QWEN_MODEL", "PAGE_SUMMARIZER_MODEL")
-        or "qwen-plus",
+        or "qwen3.8-max",
         chutes_api_token=chutes_api_token,
         chutes_base_url=_first_env("CHUTES_BASE_URL", "DOC_ANALYZER_CHUTES_BASE_URL")
         or "https://llm.chutes.ai/v1",
         chutes_model=_first_env("CHUTES_MODEL", "DOC_ANALYZER_CHUTES_MODEL")
-        or "Qwen/Qwen3-32B-TEE",
+        or "Qwen/Qwen3.8-27B-TEE",
         request_timeout=_env_float("PAGE_SUMMARIZER_HTTP_TIMEOUT", 20.0),
         llm_timeout=_env_float("PAGE_SUMMARIZER_LLM_TIMEOUT", 90.0),
         max_retries=_env_int("PAGE_SUMMARIZER_MAX_RETRIES", 3),
