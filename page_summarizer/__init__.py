@@ -1,8 +1,9 @@
-"""Пакет агента для суммаризации сайтов."""
+"""Пакет агента для разбора судебных актов."""
 
-from .agent import PageSummarizerAgent, SummaryResult, run_agent
+from .agent import AnalysisResult, PageSummarizerAgent, SummaryResult, run_agent
 
 __all__ = [
+    "AnalysisResult",
     "PageSummarizerAgent",
     "SummaryResult",
     "run_agent",

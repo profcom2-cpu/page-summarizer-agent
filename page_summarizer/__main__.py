@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from pathlib import Path
 
 from .agent import PageSummarizerAgent
 from .exceptions import PageSummarizerError
@@ -14,9 +15,17 @@ from .logging_setup import setup_logging
 def main() -> int:
     """Запускает агента из командной строки."""
     parser = argparse.ArgumentParser(
-        description="Агент для краткого резюме сайта по URL."
+        description="Разбор судебного акта: PDF/DOCX/TXT, текст или URL публикации."
     )
-    parser.add_argument("url", help="Адрес сайта, например https://example.com")
+    parser.add_argument(
+        "source",
+        nargs="?",
+        help="Путь к файлу акта или URL опубликованного акта",
+    )
+    parser.add_argument(
+        "--text",
+        help="Текст судебного акта (если не указан файл)",
+    )
     parser.add_argument(
         "-v",
         "--verbose",
@@ -27,13 +36,26 @@ def main() -> int:
 
     setup_logging(verbose=args.verbose)
 
+    url = ""
+    file_path = ""
+    text = args.text or ""
+    source = (args.source or "").strip()
+    if source.lower().startswith(("http://", "https://")):
+        url = source
+    elif source:
+        file_path = str(Path(source))
+
+    if not url and not file_path and not text.strip():
+        parser.error("Укажите файл акта, --text или URL публикации.")
+
     try:
         agent = PageSummarizerAgent()
-        result = agent.summarize_url(args.url)
-        print(result.summary)
+        result = agent.analyze(url=url, text=text, file_path=file_path)
+        print(result.format_text())
         print(
             "\n"
-            f"# Провайдер: {result.provider}; "
+            f"# Источник: {result.source}; "
+            f"провайдер: {result.provider}; "
             f"модель: {result.model}; "
             f"предложений: {result.sentences_count}; "
             f"символов в источнике: {result.source_chars}",

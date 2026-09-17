@@ -45,7 +45,14 @@ class LLMClient:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
 
-    def complete(self, *, system: str, user: str, temperature: float = 0.2) -> LLMResponse:
+    def complete(
+        self,
+        *,
+        system: str,
+        user: str,
+        temperature: float = 0.2,
+        max_tokens: int = 1600,
+    ) -> LLMResponse:
         chain = self._provider_chain()
         last_error: Exception | None = None
 
@@ -58,6 +65,7 @@ class LLMClient:
                     system=system,
                     user=user,
                     temperature=temperature,
+                    max_tokens=max_tokens,
                 )
                 logger.info(
                     "Ответ получен: provider=%s model=%s chars=%s",
@@ -100,6 +108,7 @@ class LLMClient:
         system: str,
         user: str,
         temperature: float,
+        max_tokens: int,
     ) -> tuple[str, str]:
         if provider == "qwen":
             api_key = self._settings.qwen_api_key
@@ -125,6 +134,7 @@ class LLMClient:
             system=system,
             user=user,
             temperature=temperature,
+            max_tokens=max_tokens,
             label=provider,
         )
         return text, model
@@ -137,6 +147,7 @@ class LLMClient:
         system: str,
         user: str,
         temperature: float,
+        max_tokens: int = 1600,
         label: str,
     ) -> str:
         last_error: Exception | None = None
@@ -147,7 +158,7 @@ class LLMClient:
                 response = client.chat.completions.create(
                     model=model,
                     temperature=temperature,
-                    max_tokens=500,
+                    max_tokens=max_tokens,
                     messages=[
                         {"role": "system", "content": system},
                         {"role": "user", "content": user},
