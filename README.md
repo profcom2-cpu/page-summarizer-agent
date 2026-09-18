@@ -2,7 +2,7 @@
 
 Агент на Python: принимает судебный акт (PDF, DOCX, текст или URL публикации), извлекает текст и делает структурированный разбор — суд, номер дела, стороны, резолютив, нормы и краткое резюме.
 
-Модель: **Qwen** (DashScope, OpenAI-совместимый API). Если Qwen недоступен, агент автоматически переключается на **Chutes**.
+Модель: **Qwen Token Plan** (`qwen3.8-max` / чат-боты `qwen3.8-flash`). Chutes не вызывается, пока квота пустая (`PAGE_SUMMARIZER_CHUTES_ENABLED=false`; ключ можно оставить в `.env`).
 
 Это отдельный сервис разбора актов, не конвейер JuristStudio (`court_doc_cli`).
 
@@ -24,19 +24,21 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Ключи можно положить в `.env` рядом с проектом. Если локального `.env` нет, агент подхватит уже настроенные `DOC_ANALYZER_QWEN_API_KEY` и `CHUTES_API_TOKEN` из проекта JuristStudio. Не перезаписывайте ключи Qwen в JuristStudio.
+Ключи можно положить в `.env` рядом с проектом. Локальный `.env` имеет приоритет: если в нём старый workspace-ключ Qwen, подписка Token Plan из JuristStudio **не** подхватится. Если локального `.env` нет, агент берёт `DOC_ANALYZER_QWEN_API_KEY` и `CHUTES_API_TOKEN` из JuristStudio.
 
 Пример `.env`:
 
 ```env
-QWEN_API_KEY=sk-...
-QWEN_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
-QWEN_MODEL=qwen-plus
+QWEN_API_KEY=sk-sp-...
+QWEN_BASE_URL=https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
+QWEN_MODEL=qwen3.8-max
 CHUTES_API_TOKEN=cpk_...
-PAGE_SUMMARIZER_PROVIDER=auto
+CHUTES_MODEL=zai-org/GLM-5.1-TEE
+PAGE_SUMMARIZER_PROVIDER=qwen
+PAGE_SUMMARIZER_CHUTES_ENABLED=false
 ```
 
-`PAGE_SUMMARIZER_PROVIDER`: `auto` (Qwen, затем Chutes), `qwen` или `chutes`.
+`PAGE_SUMMARIZER_PROVIDER`: `qwen` (по умолчанию), `auto` (Qwen, затем Chutes **только** если `PAGE_SUMMARIZER_CHUTES_ENABLED=true`) или `chutes`.
 
 ## Запуск
 

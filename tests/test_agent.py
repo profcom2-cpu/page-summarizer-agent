@@ -116,3 +116,38 @@ def test_analyze_requires_source() -> None:
         assert "судебный акт" in str(exc).lower()
     else:
         raise AssertionError("Ожидалась ValidationError")
+
+
+def test_web_index_has_enabled_submit_button() -> None:
+    from fastapi.testclient import TestClient
+
+    from page_summarizer.web import app
+
+    html = TestClient(app).get("/").text
+    assert "<button type=\"submit\">Разобрать акт</button>" in html
+    assert "novalidate" in html
+    assert 'name="url"' in html
+    assert 'type="url"' not in html
+    assert "<button type=\"submit\" disabled" not in html
+
+
+def test_auto_provider_chain_skips_chutes_when_disabled() -> None:
+    from page_summarizer.config import Settings
+    from page_summarizer.llm import LLMClient
+
+    settings = Settings(
+        provider="auto",
+        qwen_api_key="sk-sp-test",
+        qwen_base_url="https://example.invalid/v1",
+        qwen_model="qwen3.8-max",
+        chutes_api_token="cpk_test",
+        chutes_base_url="https://llm.chutes.ai/v1",
+        chutes_model="zai-org/GLM-5.1-TEE",
+        chutes_enabled=False,
+        request_timeout=20.0,
+        llm_timeout=90.0,
+        max_retries=1,
+        max_input_chars=1000,
+        user_agent="test",
+    )
+    assert LLMClient(settings)._provider_chain() == ["qwen"]

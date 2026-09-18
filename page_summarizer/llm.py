@@ -40,7 +40,7 @@ class LLMResponse:
 
 
 class LLMClient:
-    """Вызывает Qwen, при сбое — Chutes, если выбран режим auto."""
+    """Вызывает Qwen Token Plan. Chutes — только если PAGE_SUMMARIZER_CHUTES_ENABLED=true."""
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -92,12 +92,16 @@ class LLMClient:
         if mode == "qwen":
             return ["qwen"]
         if mode == "chutes":
+            if not self._settings.chutes_enabled:
+                raise LLMError(
+                    "Chutes отключён (PAGE_SUMMARIZER_CHUTES_ENABLED=false): лимит ответов исчерпан."
+                )
             return ["chutes"]
 
         chain: list[str] = []
         if self._settings.qwen_api_key:
             chain.append("qwen")
-        if self._settings.chutes_api_token:
+        if self._settings.chutes_enabled and self._settings.chutes_api_token:
             chain.append("chutes")
         return chain
 

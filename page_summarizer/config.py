@@ -35,6 +35,7 @@ class Settings:
     chutes_api_token: str
     chutes_base_url: str
     chutes_model: str
+    chutes_enabled: bool
     request_timeout: float
     llm_timeout: float
     max_retries: int
@@ -85,7 +86,7 @@ def get_settings() -> Settings:
     """Возвращает настройки приложения из переменных окружения."""
     load_environment()
 
-    provider = _first_env("PAGE_SUMMARIZER_PROVIDER") or "auto"
+    provider = _first_env("PAGE_SUMMARIZER_PROVIDER") or "qwen"
     if provider not in _ALLOWED_PROVIDERS:
         allowed = ", ".join(sorted(_ALLOWED_PROVIDERS))
         raise ConfigError(
@@ -99,9 +100,19 @@ def get_settings() -> Settings:
         "DOC_ANALYZER_CHUTES_API_TOKEN",
     )
 
+    chutes_enabled = _first_env(
+        "PAGE_SUMMARIZER_CHUTES_ENABLED",
+        "DOC_ANALYZER_CHUTES_ENABLED",
+    ).lower() in {"1", "true", "yes", "on"}
+
     if provider == "qwen" and not qwen_api_key:
         raise ConfigError(
             "Не задан ключ Qwen. Укажите QWEN_API_KEY или DOC_ANALYZER_QWEN_API_KEY."
+        )
+    if provider == "chutes" and not chutes_enabled:
+        raise ConfigError(
+            "Chutes отключён (PAGE_SUMMARIZER_CHUTES_ENABLED=false): "
+            "лимит ответов исчерпан. Для Qwen оставьте PAGE_SUMMARIZER_PROVIDER=qwen."
         )
     if provider == "chutes" and not chutes_api_token:
         raise ConfigError(
@@ -118,7 +129,7 @@ def get_settings() -> Settings:
         provider=provider,
         qwen_api_key=qwen_api_key,
         qwen_base_url=_first_env("QWEN_BASE_URL", "DOC_ANALYZER_QWEN_BASE_URL")
-        or "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        or "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1",
         qwen_model=_first_env("QWEN_MODEL", "DOC_ANALYZER_QWEN_MODEL", "PAGE_SUMMARIZER_MODEL")
         or "qwen3.8-max",
         chutes_api_token=chutes_api_token,
@@ -126,6 +137,7 @@ def get_settings() -> Settings:
         or "https://llm.chutes.ai/v1",
         chutes_model=_first_env("CHUTES_MODEL", "DOC_ANALYZER_CHUTES_MODEL")
         or "zai-org/GLM-5.1-TEE",
+        chutes_enabled=chutes_enabled,
         request_timeout=_env_float("PAGE_SUMMARIZER_HTTP_TIMEOUT", 20.0),
         llm_timeout=_env_float("PAGE_SUMMARIZER_LLM_TIMEOUT", 90.0),
         max_retries=_env_int("PAGE_SUMMARIZER_MAX_RETRIES", 3),
